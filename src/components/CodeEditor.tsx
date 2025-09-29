@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useApp } from '@/contexts/AppContext';
 import { MobileButton } from '@/components/ui/mobile-button';
@@ -7,27 +7,26 @@ import {
   Play, 
   Terminal as TerminalIcon, 
   AlertTriangle, 
-  Plus,
-  Folder,
-  File,
-  ChevronRight,
-  ChevronDown
+  Plus
 } from 'lucide-react';
 import { ProjectFile } from '@/types/project';
 import { nanoid } from 'nanoid';
+import { useI18n } from '@/hooks/useI18n';
+import FileExplorer from './editor/FileExplorer';
+import CodeArea from './editor/CodeArea';
+import Terminal from './editor/Terminal';
 
 const CodeEditor: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const { projects, currentProject, setCurrentProject, updateProject } = useApp();
   const navigate = useNavigate();
+  const { t } = useI18n();
   
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
   const [showTerminal, setShowTerminal] = useState(false);
   const [showFileExplorer, setShowFileExplorer] = useState(false);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
-  
-  const editorRef = useRef<HTMLTextAreaElement>(null);
 
   // Load project on mount
   useEffect(() => {
@@ -67,9 +66,9 @@ const CodeEditor: React.FC = () => {
     
     setTerminalOutput(prev => [
       ...prev,
-      `Running ${activeFile.name}...`,
-      `Output: Hello World! (Simulated)`,
-      `Process finished with exit code 0`,
+      `${t('editor.running')} ${activeFile.name}...`,
+      t('editor.output'),
+      t('editor.finished'),
       '',
     ]);
     
@@ -95,7 +94,7 @@ const CodeEditor: React.FC = () => {
     
     const newFile: ProjectFile = {
       id: nanoid(),
-      name: `untitled${currentProject.language.extension}`,
+      name: `${t('file.untitled')}${currentProject.language.extension}`,
       content: '',
       type: 'file',
     };
@@ -110,36 +109,23 @@ const CodeEditor: React.FC = () => {
     setActiveFileId(newFile.id);
   };
 
-  const renderFileTree = (files: ProjectFile[]) => {
-    return files.map(file => (
-      <div key={file.id} className="mb-1">
-        <div
-          className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-            activeFileId === file.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50'
-          }`}
-          onClick={() => {
-            if (file.type === 'file') {
-              setActiveFileId(file.id);
-              setShowFileExplorer(false);
-            }
-          }}
-        >
-          {file.type === 'folder' ? (
-            <Folder className="w-4 h-4 text-muted-foreground" />
-          ) : (
-            <File className="w-4 h-4 text-muted-foreground" />
-          )}
-          <span className="text-sm truncate">{file.name}</span>
-        </div>
-      </div>
-    ));
+  const toggleFolder = (folderId: string) => {
+    setExpandedFolders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(folderId)) {
+        newSet.delete(folderId);
+      } else {
+        newSet.add(folderId);
+      }
+      return newSet;
+    });
   };
 
   if (!currentProject) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <p className="text-muted-foreground">Loading project...</p>
+          <p className="text-muted-foreground">{t('editor.loading')}</p>
         </div>
       </div>
     );
@@ -178,46 +164,33 @@ const CodeEditor: React.FC = () => {
             onClick={() => setShowFileExplorer(false)}
           />
           <div className="fixed left-0 top-14 bottom-0 w-72 bg-card border-r border-border z-40 animate-slide-up overflow-y-auto">
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-medium">Files</h3>
-                <MobileButton variant="ghost" size="icon-sm" onClick={addFile}>
-                  <Plus className="w-4 h-4" />
-                </MobileButton>
-              </div>
-              <div className="space-y-1">
-                {renderFileTree(currentProject.files)}
-              </div>
-            </div>
+            <FileExplorer
+              currentProject={currentProject}
+              activeFileId={activeFileId}
+              expandedFolders={expandedFolders}
+              onFileSelect={(fileId) => {
+                setActiveFileId(fileId);
+                setShowFileExplorer(false);
+              }}
+              onProjectUpdate={updateProject}
+              onToggleFolder={toggleFolder}
+            />
           </div>
         </>
       )}
 
       {/* Editor Area */}
       <main className={`flex-1 flex flex-col ${showTerminal ? 'h-1/2' : ''}`}>
-        <div className="flex-1 relative">
-          <textarea
-            ref={editorRef}
-            value={activeFile?.content || ''}
-            onChange={(e) => handleCodeChange(e.target.value)}
-            className="w-full h-full p-4 bg-editor-background text-editor-foreground resize-none border-none outline-none code-editor leading-relaxed"
-            style={{
-              fontSize: '14px',
-              lineHeight: '1.6',
-              fontFamily: "'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace",
-            }}
-            placeholder={activeFile ? "Start coding..." : "Select a file to edit"}
-            spellCheck={false}
-          />
-          
-          {/* Line numbers could be added here */}
-        </div>
+        <CodeArea
+          activeFile={activeFile}
+          onCodeChange={handleCodeChange}
+        />
         
         {/* Bottom Controls */}
         <div className="h-14 flex items-center justify-between px-4 border-t border-border bg-card">
           <MobileButton variant="floating" size="sm" onClick={handleRun} className="flex-1 mr-2 max-w-32">
             <Play className="w-4 h-4 mr-2" />
-            Run
+            {t('editor.run')}
           </MobileButton>
           
           <MobileButton 
@@ -232,29 +205,10 @@ const CodeEditor: React.FC = () => {
 
       {/* Terminal Panel */}
       {showTerminal && (
-        <div className="h-64 border-t border-border bg-editor-background animate-slide-up">
-          <div className="h-full flex flex-col">
-            <div className="h-12 flex items-center justify-between px-4 border-b border-border">
-              <h3 className="text-sm font-medium text-editor-foreground">Terminal</h3>
-              <MobileButton variant="ghost" size="icon-sm" onClick={toggleTerminal}>
-                <ChevronDown className="w-4 h-4" />
-              </MobileButton>
-            </div>
-            <div className="flex-1 p-4 overflow-y-auto">
-              <div className="code-editor text-sm">
-                {terminalOutput.map((line, index) => (
-                  <div key={index} className="mb-1 text-editor-foreground">
-                    {line || '\u00A0'}
-                  </div>
-                ))}
-                <div className="flex items-center">
-                  <span className="text-primary mr-2">$</span>
-                  <span className="text-editor-foreground">Ready for input...</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Terminal
+          terminalOutput={terminalOutput}
+          onToggle={toggleTerminal}
+        />
       )}
     </div>
   );

@@ -16,10 +16,12 @@ import {
   Save
 } from 'lucide-react';
 import { Settings as SettingsType } from '@/types/project';
+import { useI18n } from '@/hooks/useI18n';
 
 const Settings: React.FC = () => {
   const { settings, updateSettings } = useApp();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -58,7 +60,7 @@ const Settings: React.FC = () => {
         >
           <ArrowLeft className="w-5 h-5" />
         </MobileButton>
-        <h1 className="text-lg font-semibold">Settings</h1>
+        <h1 className="text-lg font-semibold">{t('settings.title')}</h1>
         <div className="w-10" />
       </header>
 
@@ -225,7 +227,7 @@ const Settings: React.FC = () => {
             onClick={handleSave}
           >
             <Save className="w-5 h-5 mr-2" />
-            Save Settings
+            {t('settings.save')}
           </MobileButton>
         </div>
       </main>

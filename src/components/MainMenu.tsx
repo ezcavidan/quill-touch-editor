@@ -4,10 +4,12 @@ import { MobileButton } from '@/components/ui/mobile-button';
 import { Card } from '@/components/ui/card';
 import { Plus, Folder, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useI18n } from '@/hooks/useI18n';
 
 const MainMenu: React.FC = () => {
   const { projects } = useApp();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en', {
@@ -38,7 +40,7 @@ const MainMenu: React.FC = () => {
           <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-sm">{"<>"}</span>
           </div>
-          <h1 className="text-xl font-semibold">Code Editor</h1>
+          <h1 className="text-xl font-semibold">{t('app.title')}</h1>
         </div>
       </header>
 
@@ -50,9 +52,9 @@ const MainMenu: React.FC = () => {
               <div className="w-20 h-20 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Folder className="w-10 h-10 text-muted-foreground" />
               </div>
-              <h2 className="text-lg font-medium mb-2">No projects yet</h2>
+              <h2 className="text-lg font-medium mb-2">{t('projects.empty.title')}</h2>
               <p className="text-muted-foreground mb-8">
-                Create your first project to get started coding
+                {t('projects.empty.subtitle')}
               </p>
               <MobileButton 
                 variant="floating" 
@@ -61,14 +63,14 @@ const MainMenu: React.FC = () => {
                 className="mx-auto"
               >
                 <Plus className="w-5 h-5 mr-2" />
-                Create Project
+                {t('projects.create')}
               </MobileButton>
             </div>
           ) : (
             <>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold">Your Projects</h2>
-                <span className="text-sm text-muted-foreground">{projects.length} projects</span>
+                <h2 className="text-lg font-semibold">{t('projects.title')}</h2>
+                <span className="text-sm text-muted-foreground">{projects.length} {t('projects.count')}</span>
               </div>
               
               <div className="space-y-4">
@@ -119,7 +121,7 @@ const MainMenu: React.FC = () => {
       <nav className="fixed bottom-0 left-0 right-0 h-20 bg-card border-t border-border flex items-center justify-around">
         <MobileButton variant="ghost" size="icon" className="flex-col text-xs gap-1 h-16">
           <Folder className="w-6 h-6 text-primary" />
-          <span className="text-primary font-medium">Projects</span>
+          <span className="text-primary font-medium">{t('nav.projects')}</span>
         </MobileButton>
         
         <MobileButton 
@@ -129,7 +131,7 @@ const MainMenu: React.FC = () => {
           onClick={handleSettings}
         >
           <Settings className="w-6 h-6 text-muted-foreground" />
-          <span className="text-muted-foreground">Settings</span>
+          <span className="text-muted-foreground">{t('nav.settings')}</span>
         </MobileButton>
       </nav>
     </div>

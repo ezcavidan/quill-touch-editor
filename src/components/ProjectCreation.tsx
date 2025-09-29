@@ -8,12 +8,14 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft } from 'lucide-react';
 import { PROGRAMMING_LANGUAGES, Project, ProjectFile } from '@/types/project';
 import { nanoid } from 'nanoid';
+import { useI18n } from '@/hooks/useI18n';
 
 const ProjectCreation: React.FC = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [projectName, setProjectName] = useState('');
   const { addProject } = useApp();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const handleLanguageSelect = (languageId: string) => {
     setSelectedLanguage(languageId);
@@ -134,7 +136,7 @@ const ProjectCreation: React.FC = () => {
                   onClick={handleCreateProject}
                   disabled={!canCreate}
                 >
-                  Create Project
+                  {t('create.button')}
                 </MobileButton>
                 
                 <MobileButton
