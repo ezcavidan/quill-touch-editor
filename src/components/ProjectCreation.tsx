@@ -61,7 +61,7 @@ const ProjectCreation: React.FC = () => {
         >
           <ArrowLeft className="w-5 h-5" />
         </MobileButton>
-        <h1 className="text-lg font-semibold">New Project</h1>
+        <h1 className="text-lg font-semibold">{t('create.title')}</h1>
         <div className="w-10" />
       </header>
 
@@ -70,8 +70,8 @@ const ProjectCreation: React.FC = () => {
           {!isLanguageSelected ? (
             <>
               <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-2">Choose Language</h2>
-                <p className="text-muted-foreground">Select a programming language to get started</p>
+                <h2 className="text-xl font-semibold mb-2">{t('create.language')}</h2>
+                <p className="text-muted-foreground">{t('create.description')}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -92,13 +92,13 @@ const ProjectCreation: React.FC = () => {
           ) : (
             <>
               <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-2">Project Details</h2>
-                <p className="text-muted-foreground">Give your project a name</p>
+                <h2 className="text-xl font-semibold mb-2">{t('create.details.title')}</h2>
+                <p className="text-muted-foreground">{t('create.details.subtitle')}</p>
               </div>
 
               {/* Selected Language Display */}
               <div className="mb-6">
-                <Label className="text-sm font-medium text-muted-foreground">Selected Language</Label>
+                <Label className="text-sm font-medium text-muted-foreground">{t('create.selectedLanguage')}</Label>
                 <Card className="p-4 mt-2 bg-primary/5 border-primary/20">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">
@@ -114,12 +114,12 @@ const ProjectCreation: React.FC = () => {
               {/* Project Name Input */}
               <div className="mb-8">
                 <Label htmlFor="projectName" className="text-sm font-medium">
-                  Project Name
+                  {t('create.name')}
                 </Label>
                 <Input
                   id="projectName"
                   type="text"
-                  placeholder="Enter project name..."
+                  placeholder={t('create.name.placeholder')}
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                   className="mt-2 h-12 rounded-xl bg-input border-border focus:border-primary focus:ring-primary/20"
@@ -145,7 +145,7 @@ const ProjectCreation: React.FC = () => {
                   className="w-full"
                   onClick={() => setSelectedLanguage(null)}
                 >
-                  Change Language
+                  {t('create.changeLanguage')}
                 </MobileButton>
               </div>
             </>

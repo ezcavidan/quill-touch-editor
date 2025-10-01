@@ -75,7 +75,7 @@ const Settings: React.FC = () => {
               ) : (
                 <Sun className="w-5 h-5 text-primary" />
               )}
-              <h3 className="font-medium">Theme</h3>
+              <h3 className="font-medium">{t('settings.theme')}</h3>
             </div>
             
             <div className="space-y-3">
@@ -95,7 +95,7 @@ const Settings: React.FC = () => {
                     ) : (
                       <Sun className="w-4 h-4" />
                     )}
-                    <span className="capitalize">{theme}</span>
+                    <span>{t(`settings.theme.${theme}`)}</span>
                     {settings.theme === theme && (
                       <div className="ml-auto w-2 h-2 bg-primary rounded-full" />
                     )}
@@ -109,7 +109,7 @@ const Settings: React.FC = () => {
           <Card className="p-6 bg-gradient-card border-border">
             <div className="flex items-center gap-3 mb-4">
               <Globe className="w-5 h-5 text-primary" />
-              <h3 className="font-medium">Language</h3>
+              <h3 className="font-medium">{t('settings.language')}</h3>
             </div>
             
             <div className="space-y-3">
@@ -139,13 +139,13 @@ const Settings: React.FC = () => {
           <Card className="p-6 bg-gradient-card border-border">
             <div className="flex items-center gap-3 mb-4">
               <Type className="w-5 h-5 text-primary" />
-              <h3 className="font-medium">Editor</h3>
+              <h3 className="font-medium">{t('settings.editor')}</h3>
             </div>
             
             <div className="space-y-6">
               {/* Font Size */}
               <div>
-                <Label className="text-sm font-medium mb-3 block">Font Size</Label>
+                <Label className="text-sm font-medium mb-3 block">{t('settings.fontSize')}</Label>
                 <div className="space-y-2">
                   {fontSizes.map((size) => (
                     <div 
@@ -158,7 +158,7 @@ const Settings: React.FC = () => {
                       onClick={() => handleSettingChange('fontSize', size.value)}
                     >
                       <div className="flex items-center justify-between">
-                        <span>{size.label}</span>
+                        <span>{t(`settings.fontSize.${size.value}`)}</span>
                         {settings.fontSize === size.value && (
                           <div className="w-2 h-2 bg-primary rounded-full" />
                         )}
@@ -170,7 +170,7 @@ const Settings: React.FC = () => {
 
               {/* Tab Size */}
               <div>
-                <Label className="text-sm font-medium mb-3 block">Tab Size</Label>
+                <Label className="text-sm font-medium mb-3 block">{t('settings.tabSize')}</Label>
                 <div className="space-y-2">
                   {tabSizes.map((tab) => (
                     <div 
@@ -196,7 +196,7 @@ const Settings: React.FC = () => {
               {/* Auto-save Toggle */}
               <div className="flex items-center justify-between p-3 rounded-lg border border-border">
                 <div>
-                  <Label className="font-medium">Auto-save</Label>
+                  <Label className="font-medium">{t('settings.autoSave')}</Label>
                   <p className="text-sm text-muted-foreground">Automatically save changes</p>
                 </div>
                 <Switch
@@ -208,7 +208,7 @@ const Settings: React.FC = () => {
               {/* Auto-format Toggle */}
               <div className="flex items-center justify-between p-3 rounded-lg border border-border">
                 <div>
-                  <Label className="font-medium">Auto-format</Label>
+                  <Label className="font-medium">{t('settings.autoFormat')}</Label>
                   <p className="text-sm text-muted-foreground">Format code automatically</p>
                 </div>
                 <Switch
@@ -241,12 +241,12 @@ const Settings: React.FC = () => {
           onClick={() => navigate('/')}
         >
           <Folder className="w-6 h-6 text-muted-foreground" />
-          <span className="text-muted-foreground">Projects</span>
+          <span className="text-muted-foreground">{t('nav.projects')}</span>
         </MobileButton>
         
         <MobileButton variant="ghost" size="icon" className="flex-col text-xs gap-1 h-16">
           <SettingsIcon className="w-6 h-6 text-primary" />
-          <span className="text-primary font-medium">Settings</span>
+          <span className="text-primary font-medium">{t('nav.settings')}</span>
         </MobileButton>
       </nav>
     </div>
