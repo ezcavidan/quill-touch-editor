@@ -18,6 +18,16 @@ export const translations: Translations = {
     'nav.projects': 'Projects',
     'nav.settings': 'Settings',
     
+    // Project Actions
+    'project.rename': 'Rename',
+    'project.delete': 'Delete',
+    'project.rename.title': 'Rename Project',
+    'project.rename.placeholder': 'Enter new name',
+    'project.delete.title': 'Delete Project',
+    'project.delete.message': 'Are you sure you want to delete this project? This action cannot be undone.',
+    'project.cancel': 'Cancel',
+    'project.confirm': 'Confirm',
+    
     // Project Creation
     'create.title': 'Create New Project',
     'create.language': 'Choose Language',
@@ -74,6 +84,16 @@ export const translations: Translations = {
     'nav.projects': 'Layihələr',
     'nav.settings': 'Tənzimləmələr',
     
+    // Project Actions
+    'project.rename': 'Adını Dəyiş',
+    'project.delete': 'Sil',
+    'project.rename.title': 'Layihənin Adını Dəyiş',
+    'project.rename.placeholder': 'Yeni ad daxil edin',
+    'project.delete.title': 'Layihəni Sil',
+    'project.delete.message': 'Bu layihəni silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz.',
+    'project.cancel': 'Ləğv et',
+    'project.confirm': 'Təsdiq et',
+    
     // Project Creation
     'create.title': 'Yeni Layihə Yarat',
     'create.language': 'Dil Seçin',
@@ -129,6 +149,16 @@ export const translations: Translations = {
     'projects.count': 'proje',
     'nav.projects': 'Projeler',
     'nav.settings': 'Ayarlar',
+    
+    // Project Actions
+    'project.rename': 'Yeniden Adlandır',
+    'project.delete': 'Sil',
+    'project.rename.title': 'Projeyi Yeniden Adlandır',
+    'project.rename.placeholder': 'Yeni ad girin',
+    'project.delete.title': 'Projeyi Sil',
+    'project.delete.message': 'Bu projeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+    'project.cancel': 'İptal',
+    'project.confirm': 'Onayla',
     
     // Project Creation
     'create.title': 'Yeni Proje Oluştur',
