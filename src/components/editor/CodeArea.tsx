@@ -24,35 +24,8 @@ const CodeArea: React.FC<CodeAreaProps> = ({ activeFile, onCodeChange }) => {
     }
   }, [activeFile?.content]);
 
-  // Apply syntax highlighting to content
-  const applySyntaxHighlighting = (content: string): string => {
-    if (!content) return content;
-
-    // Simple syntax highlighting patterns
-    const patterns = [
-      // Keywords
-      { regex: /\b(function|const|let|var|if|else|for|while|return|class|import|export|from|async|await|try|catch|finally)\b/g, className: 'text-code-keyword font-semibold' },
-      // Strings
-      { regex: /(["'`])(?:(?=(\\?))\2.)*?\1/g, className: 'text-code-string' },
-      // Numbers
-      { regex: /\b\d+\.?\d*\b/g, className: 'text-code-number' },
-      // Comments
-      { regex: /\/\/.*$/gm, className: 'text-code-comment italic' },
-      { regex: /\/\*[\s\S]*?\*\//g, className: 'text-code-comment italic' },
-      // Operators
-      { regex: /[+\-*/=<>!&|]+/g, className: 'text-code-operator' },
-    ];
-
-    let highlightedContent = content;
-    patterns.forEach(pattern => {
-      highlightedContent = highlightedContent.replace(
-        pattern.regex,
-        `<span class="${pattern.className}">$&</span>`
-      );
-    });
-
-    return highlightedContent;
-  };
+  // Note: Syntax highlighting is applied via CSS classes on the textarea
+  // We're keeping the implementation simple to avoid rendering issues
 
   const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
     const lineNumberEl = document.querySelector('.line-numbers');
@@ -90,7 +63,7 @@ const CodeArea: React.FC<CodeAreaProps> = ({ activeFile, onCodeChange }) => {
           value={activeFile?.content || ''}
           onChange={(e) => onCodeChange(e.target.value)}
           onScroll={handleScroll}
-          className="w-full h-full p-4 bg-transparent text-editor-foreground resize-none border-none outline-none code-editor leading-relaxed relative z-10"
+          className="w-full h-full p-4 bg-transparent text-editor-foreground resize-none border-none outline-none code-editor leading-relaxed"
           style={{
             fontSize: getFontSize(),
             lineHeight: '1.6',
@@ -100,22 +73,6 @@ const CodeArea: React.FC<CodeAreaProps> = ({ activeFile, onCodeChange }) => {
           placeholder={activeFile ? t('editor.startCoding') : t('editor.selectFile')}
           spellCheck={false}
         />
-
-        {/* Syntax Highlighting Overlay (for display purposes only) */}
-        {activeFile?.content && (
-          <div 
-            className="absolute inset-0 p-4 pointer-events-none text-transparent leading-relaxed whitespace-pre-wrap overflow-hidden"
-            style={{
-              fontSize: getFontSize(),
-              lineHeight: '1.6',
-              fontFamily: "'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace",
-              tabSize: settings.tabSize,
-            }}
-            dangerouslySetInnerHTML={{ 
-              __html: applySyntaxHighlighting(activeFile.content)
-            }}
-          />
-        )}
       </div>
     </div>
   );

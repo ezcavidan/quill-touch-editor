@@ -82,12 +82,22 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
     }
   };
 
+  const renameFileRecursive = (files: ProjectFile[], fileId: string, newName: string): ProjectFile[] => {
+    return files.map(file => {
+      if (file.id === fileId) {
+        return { ...file, name: newName };
+      }
+      if (file.children) {
+        return { ...file, children: renameFileRecursive(file.children, fileId, newName) };
+      }
+      return file;
+    });
+  };
+
   const handleRenameFile = () => {
     if (!selectedFile || !createName.trim()) return;
     
-    const updatedFiles = currentProject.files.map(file =>
-      file.id === selectedFile.id ? { ...file, name: createName } : file
-    );
+    const updatedFiles = renameFileRecursive(currentProject.files, selectedFile.id, createName);
     
     const updatedProject = {
       ...currentProject,
@@ -101,8 +111,15 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
     setSelectedFile(null);
   };
 
+  const deleteFileRecursive = (files: ProjectFile[], fileId: string): ProjectFile[] => {
+    return files.filter(file => file.id !== fileId).map(file => ({
+      ...file,
+      children: file.children ? deleteFileRecursive(file.children, fileId) : undefined,
+    }));
+  };
+
   const handleDeleteFile = (fileId: string) => {
-    const updatedFiles = currentProject.files.filter(file => file.id !== fileId);
+    const updatedFiles = deleteFileRecursive(currentProject.files, fileId);
     const updatedProject = {
       ...currentProject,
       files: updatedFiles,
@@ -138,15 +155,69 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
     e.dataTransfer.dropEffect = 'move';
   };
 
+  const moveFileToFolder = (files: ProjectFile[], fileId: string, targetFolderId: string): { success: boolean; files: ProjectFile[] } => {
+    let movedFile: ProjectFile | null = null;
+    
+    // First, remove the file from its current location
+    const removeFile = (fileList: ProjectFile[]): ProjectFile[] => {
+      return fileList.filter(file => {
+        if (file.id === fileId) {
+          movedFile = file;
+          return false;
+        }
+        if (file.children) {
+          file.children = removeFile(file.children);
+        }
+        return true;
+      });
+    };
+    
+    const filesWithoutMoved = removeFile([...files]);
+    
+    if (!movedFile) return { success: false, files };
+    
+    // Then, add it to the target folder
+    const addToFolder = (fileList: ProjectFile[]): ProjectFile[] => {
+      return fileList.map(file => {
+        if (file.id === targetFolderId && file.type === 'folder') {
+          return {
+            ...file,
+            children: [...(file.children || []), movedFile!],
+          };
+        }
+        if (file.children) {
+          return {
+            ...file,
+            children: addToFolder(file.children),
+          };
+        }
+        return file;
+      });
+    };
+    
+    return { success: true, files: addToFolder(filesWithoutMoved) };
+  };
+
   const handleDrop = (e: React.DragEvent, targetFolder: ProjectFile) => {
     e.preventDefault();
+    e.stopPropagation();
+    
     if (!draggedFile || targetFolder.type !== 'folder' || draggedFile.id === targetFolder.id) {
       setDraggedFile(null);
       return;
     }
 
-    // For now, just copy the file since we're not implementing full folder structure
-    handleCopyFile(draggedFile);
+    const result = moveFileToFolder(currentProject.files, draggedFile.id, targetFolder.id);
+    
+    if (result.success) {
+      const updatedProject = {
+        ...currentProject,
+        files: result.files,
+        lastModified: new Date(),
+      };
+      onProjectUpdate(updatedProject);
+    }
+    
     setDraggedFile(null);
   };
 
@@ -162,62 +233,87 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
     setShowRenameDialog(true);
   };
 
-  const renderFileItem = (file: ProjectFile) => (
-    <div key={file.id} className="mb-1">
-      <div
-        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors group ${
-          activeFileId === file.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50'
-        }`}
-        onClick={() => {
-          if (file.type === 'file') {
-            onFileSelect(file.id);
-          } else {
-            onToggleFolder(file.id);
-          }
-        }}
-        draggable={file.type === 'file'}
-        onDragStart={(e) => file.type === 'file' && handleDragStart(e, file)}
-        onDragOver={file.type === 'folder' ? handleDragOver : undefined}
-        onDrop={file.type === 'folder' ? (e) => handleDrop(e, file) : undefined}
-      >
-        {file.type === 'folder' ? (
-          <Folder className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-        ) : (
-          <File className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-        )}
-        <span className="text-sm truncate flex-1">{file.name}</span>
+  const renderFileItem = (file: ProjectFile, depth: number = 0) => {
+    const isExpanded = expandedFolders.has(file.id);
+    const hasChildren = file.children && file.children.length > 0;
+    
+    return (
+      <div key={file.id} className="mb-1">
+        <div
+          className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all group ${
+            activeFileId === file.id ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50'
+          } ${draggedFile?.id === file.id ? 'opacity-50' : ''}`}
+          style={{ paddingLeft: `${8 + depth * 16}px` }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (file.type === 'file') {
+              onFileSelect(file.id);
+            } else {
+              onToggleFolder(file.id);
+            }
+          }}
+          draggable
+          onDragStart={(e) => handleDragStart(e, file)}
+          onDragOver={file.type === 'folder' ? handleDragOver : undefined}
+          onDrop={file.type === 'folder' ? (e) => handleDrop(e, file) : undefined}
+        >
+          {file.type === 'folder' ? (
+            <Folder className={`w-4 h-4 flex-shrink-0 transition-colors ${
+              isExpanded ? 'text-primary' : 'text-muted-foreground'
+            }`} />
+          ) : (
+            <File className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          )}
+          <span className="text-sm truncate flex-1">{file.name}</span>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <MobileButton 
+                variant="ghost" 
+                size="icon-sm" 
+                className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity h-6 w-6 flex-shrink-0"
+              >
+                <MoreVertical className="w-3 h-3" />
+              </MobileButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="z-50">
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                openRenameDialog(file);
+              }}>
+                <Edit className="w-4 h-4 mr-2" />
+                {t('file.rename')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                handleCopyFile(file);
+              }}>
+                <Copy className="w-4 h-4 mr-2" />
+                {t('file.copy')}
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteFile(file.id);
+                }}
+                className="text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {t('file.delete')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <MobileButton 
-              variant="ghost" 
-              size="icon-sm" 
-              className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
-            >
-              <MoreVertical className="w-3 h-3" />
-            </MobileButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => openRenameDialog(file)}>
-              <Edit className="w-4 h-4 mr-2" />
-              {t('file.rename')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleCopyFile(file)}>
-              <Copy className="w-4 h-4 mr-2" />
-              {t('file.copy')}
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => handleDeleteFile(file.id)}
-              className="text-destructive"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              {t('file.delete')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Render children if folder is expanded */}
+        {file.type === 'folder' && isExpanded && hasChildren && (
+          <div className="animate-slideDown">
+            {file.children!.map(child => renderFileItem(child, depth + 1))}
+          </div>
+        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <>
@@ -243,7 +339,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
           </DropdownMenu>
         </div>
         <div className="space-y-1">
-          {currentProject.files.map(renderFileItem)}
+          {currentProject.files.map(file => renderFileItem(file, 0))}
         </div>
       </div>
 
