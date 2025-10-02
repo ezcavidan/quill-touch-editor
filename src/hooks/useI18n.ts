@@ -54,6 +54,7 @@ export const translations: Translations = {
     'editor.running': 'Running',
     'editor.output': 'Output: Hello World! (Simulated)',
     'editor.finished': 'Process finished with exit code 0',
+    'editor.preview': 'Preview',
     
     // File Management
     'file.new': 'New File',
@@ -126,6 +127,7 @@ export const translations: Translations = {
     'editor.running': 'İşləyir',
     'editor.output': 'Çıxış: Salam Dünya! (Simulyasiya)',
     'editor.finished': 'Proses 0 çıxış kodu ilə bitdi',
+    'editor.preview': 'Önizləmə',
     
     // File Management
     'file.new': 'Yeni Fayl',
@@ -198,6 +200,7 @@ export const translations: Translations = {
     'editor.running': 'Çalışıyor',
     'editor.output': 'Çıktı: Merhaba Dünya! (Simülasyon)',
     'editor.finished': 'İşlem 0 çıkış kodu ile tamamlandı',
+    'editor.preview': 'Önizleme',
     
     // File Management
     'file.new': 'Yeni Dosya',

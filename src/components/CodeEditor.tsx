@@ -7,7 +7,8 @@ import {
   Play, 
   Terminal as TerminalIcon, 
   AlertTriangle, 
-  Plus
+  Plus,
+  Eye
 } from 'lucide-react';
 import { ProjectFile } from '@/types/project';
 import { nanoid } from 'nanoid';
@@ -27,6 +28,7 @@ const CodeEditor: React.FC = () => {
   const [showFileExplorer, setShowFileExplorer] = useState(false);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Load project on mount
   useEffect(() => {
@@ -64,17 +66,65 @@ const CodeEditor: React.FC = () => {
   const handleRun = () => {
     if (!currentProject || !activeFile) return;
     
-    setTerminalOutput(prev => [
-      ...prev,
-      `${t('editor.running')} ${activeFile.name}...`,
-      t('editor.output'),
-      t('editor.finished'),
-      '',
-    ]);
+    // For web projects, execute the code
+    if (currentProject.language.id === 'web') {
+      try {
+        // Extract and execute JavaScript
+        const scriptMatches = activeFile.content.match(/<script[^>]*>([\s\S]*?)<\/script>/gi);
+        const output: string[] = [`${t('editor.running')} ${activeFile.name}...`];
+        
+        // Override console.log to capture output
+        const originalLog = console.log;
+        const logs: string[] = [];
+        console.log = (...args) => {
+          logs.push(args.map(arg => String(arg)).join(' '));
+          originalLog(...args);
+        };
+        
+        if (scriptMatches) {
+          scriptMatches.forEach(script => {
+            const code = script.replace(/<script[^>]*>|<\/script>/gi, '');
+            try {
+              eval(code);
+            } catch (err) {
+              logs.push(`Error: ${err}`);
+            }
+          });
+        }
+        
+        // Restore console.log
+        console.log = originalLog;
+        
+        output.push(...logs);
+        output.push(t('editor.finished'));
+        output.push('');
+        
+        setTerminalOutput(prev => [...prev, ...output]);
+      } catch (err) {
+        setTerminalOutput(prev => [
+          ...prev,
+          `${t('editor.running')} ${activeFile.name}...`,
+          `Error: ${err}`,
+          '',
+        ]);
+      }
+    } else {
+      setTerminalOutput(prev => [
+        ...prev,
+        `${t('editor.running')} ${activeFile.name}...`,
+        t('editor.output'),
+        t('editor.finished'),
+        '',
+      ]);
+    }
     
     if (!showTerminal) {
       setShowTerminal(true);
     }
+  };
+
+  const togglePreview = () => {
+    setShowPreview(!showPreview);
   };
 
   const handleBack = () => {
@@ -193,6 +243,17 @@ const CodeEditor: React.FC = () => {
             {t('editor.run')}
           </MobileButton>
           
+          {currentProject.language.id === 'web' && (
+            <MobileButton 
+              variant={showPreview ? "editor" : "ghost"} 
+              size="icon-sm" 
+              onClick={togglePreview}
+              className="mr-2"
+            >
+              <Eye className="w-4 h-4" />
+            </MobileButton>
+          )}
+          
           <MobileButton 
             variant={showTerminal ? "editor" : "ghost"} 
             size="icon-sm" 
@@ -209,6 +270,32 @@ const CodeEditor: React.FC = () => {
           terminalOutput={terminalOutput}
           onToggle={toggleTerminal}
         />
+      )}
+
+      {/* Preview Window */}
+      {showPreview && currentProject.language.id === 'web' && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black/60 z-30"
+            onClick={() => setShowPreview(false)}
+          />
+          <div className="fixed inset-4 z-40 bg-background rounded-lg shadow-2xl flex flex-col animate-scale-in">
+            <div className="h-14 flex items-center justify-between px-4 border-b border-border">
+              <h2 className="font-medium">{t('editor.preview')}</h2>
+              <MobileButton variant="ghost" size="icon-sm" onClick={() => setShowPreview(false)}>
+                <ArrowLeft className="w-4 h-4" />
+              </MobileButton>
+            </div>
+            <div className="flex-1 overflow-auto">
+              <iframe
+                srcDoc={activeFile?.content || ''}
+                className="w-full h-full border-0"
+                title="Preview"
+                sandbox="allow-scripts"
+              />
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

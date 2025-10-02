@@ -26,8 +26,8 @@ export interface ProgrammingLanguage {
 
 export const PROGRAMMING_LANGUAGES: ProgrammingLanguage[] = [
   {
-    id: 'html',
-    name: 'HTML',
+    id: 'web',
+    name: 'HTML/CSS/JS',
     extension: '.html',
     icon: '🌐',
     template: `<!DOCTYPE html>
@@ -36,9 +36,24 @@ export const PROGRAMMING_LANGUAGES: ProgrammingLanguage[] = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <h1>Hello World!</h1>
+    <script>
+        console.log('Hello from JavaScript!');
+    </script>
 </body>
 </html>`
   },

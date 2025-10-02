@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Plus, Folder, Settings, MoreVertical } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '@/hooks/useI18n';
+import codladaLogo from '@/assets/codlada-logo.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -103,10 +104,7 @@ const MainMenu: React.FC = () => {
       {/* Header */}
       <header className="h-20 flex items-center px-6 bg-background">
         <div className="flex items-center gap-3">
-          {/* Logo placeholder - will be replaced when user provides logo */}
-          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-            <span className="text-foreground font-bold text-lg">C</span>
-          </div>
+          <img src={codladaLogo} alt="CODLADA" className="w-12 h-12" />
           <h1 className="text-2xl font-bold tracking-tight">CODLADA</h1>
         </div>
       </header>
