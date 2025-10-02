@@ -101,12 +101,13 @@ const MainMenu: React.FC = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="h-16 flex items-center justify-between px-6 border-b border-border bg-card">
+      <header className="h-20 flex items-center px-6 bg-background">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">{"<>"}</span>
+          {/* Logo placeholder - will be replaced when user provides logo */}
+          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+            <span className="text-foreground font-bold text-lg">C</span>
           </div>
-          <h1 className="text-xl font-semibold">{t('app.title')}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">CODLADA</h1>
         </div>
       </header>
 
